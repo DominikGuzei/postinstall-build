@@ -299,12 +299,13 @@ function postinstallBuild () {
   }
 
   var installBuildDependencies = function (execOpts, callback) {
-    // We only need to install dependencies if `shouldPrune` is true. Why?
+    // We only need to install dependencies if `shouldPrune` is true or if we
+    // explicitely want to avoid pruning dev dependencies. Why?
     // Because this flag detects whether `devDependencies` were already
     // installed in order to determine whether they need to be pruned at the
     // end or not. And if we already have `devDependencies` then installing
     // here isn't going to get us anything.
-    if (shouldPrune) {
+    if (flags.avoidPrune || shouldPrune) {
       // If `installArgs` is empty, the build doesn't depend on installing any
       // extra dependencies.
       var installArgs = getInstallArgs()
