@@ -105,6 +105,8 @@ function postinstallBuild () {
     } else if (arg === '--script') {
       // Consume the next argument.
       flags.script = process.argv[++i]
+    } else if (arg === '--avoid-prune') {
+      flags.avoidPrune = true;
     } else if (arg.indexOf('--script=') === 0) {
       flags.script = arg.slice(9)
     } else if (buildArtifact == null) {
@@ -189,15 +191,18 @@ function postinstallBuild () {
     return
   }
 
-  // If we're the top-level package being `npm install`ed with no arguments,
-  // we still might want to prune if certain flags indicate that only production
-  // dependencies were requested.
-  var isProduction = (process.env.npm_config_production === 'true' &&
-                      process.env.npm_config_only !== 'development' &&
-                      process.env.npm_config_only !== 'dev')
-  var isOnlyProduction = (process.env.npm_config_only === 'production' ||
-                          process.env.npm_config_only === 'prod')
-  var shouldPrune = isDependency || isProduction || isOnlyProduction
+  var shouldPrune = false;
+  if (!flags.avoidPrune) {
+    // If we're the top-level package being `npm install`ed with no arguments,
+    // we still might want to prune if certain flags indicate that only production
+    // dependencies were requested.
+    var isProduction = (process.env.npm_config_production === 'true' &&
+                        process.env.npm_config_only !== 'development' &&
+                        process.env.npm_config_only !== 'dev')
+    var isOnlyProduction = (process.env.npm_config_only === 'production' ||
+                            process.env.npm_config_only === 'prod')
+    shouldPrune = isDependency || isProduction || isOnlyProduction
+  }
 
   var getInstallArgs = function () {
     var packageFile = path.join(CWD, 'package.json')
